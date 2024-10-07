@@ -104,3 +104,36 @@ note = note("<small>Author: <i>David Tschumperlé</i>.      Latest Update: <i>20
 In the case of  if not gui_txt.startswith(":"):, the options should not be touched. Instead of options_list = options_txt.split(","), set functions_list = options_txt.split(",") then set key=functions_list[0] and set command.functions = functions_list
 
 
+Instead of processing for line in commands_txt.splitlines(), directly, iterate a gui_lines list and iterate that instead. To generate it, separate '#@gui ' (be sure to check for a space after gui) lines from other lines otherwise continue (short circuit the loop). Merge the multi-line statements:
+  - curly braces:
+```
+#@gui : Preset = choice{1,"Default (Circle)","Alien Rasta","All Round","Carnivorous Plant","Cat Pad","Flower",
+#@gui : "Flower Cushion","Fly Karateka","Hearts","Moving Leaf","Radioactive Flower","Rosace","Spaceship",
+#@gui : "Transformer","Tubular Waves","Twisted Heart","Twisted Heart 2","Twisted Tunnel","Waterslide"}
+```
+    - or:
+```
+#@gui : note = note{"You must then decompress all files contained in this archive at the following location:\n
+#@gui : - for <b>Unix</b>-like systems : <span color="blue"><samp>$HOME/.cache/gmic/</samp></span>\n
+#@gui : - for <b>Windows</b> systems : <span color="blue"><samp>%APPDATA%/gmic/</samp></span>
+#@gui : "}
+```
+  - explicit line continuation:
+```
+#@gui : note = note("<small><b><span color="#FF0055">Note:</span></b> Set <i>Random Seed</i> to <b>0</b> to make it \
+# random as well.</small>")
+```
+  - implicit line continuation:
+```
+#@gui : note = note("<small><b>Note:</b> This filter proposes a showcase of some interactive demos, all written
+#@gui : as G'MIC scripts.</small>")
+```
+
+- [ ] For nested quotes, track the quoted or unquoted status by iterating each character, and if unquoted and character is ")", end the string regardless of the number of lines: ```note = note("<center><a href="https://tschumperle.users.greyc.fr/"><img src="data:image/png;base64,iVB
+# AnoH9FcRhS6kAAAAAElFTkSuQmCC" />   Sébastien Fourey</a></center>")
+``` Combine multiline curly braces the same way as parenthesis. Find either the parenthesis or curly brace, and find end_char like {'(': ")", '{': "}"}[start_char]
+
+
+To ensure start entry lines are not confused with {  or ( continuations, make a collecting boolean and use that to supercede start entry parsing. If not collecting, check for the start_chart, but instead of looking to see if "(" in line or "{" in line, do it more reliably. Set value = line.split("=", 1)[1]. Use regex to split value further, ending on either "(" or "{" and everything after that is processed in the way I've described to find the closing on that line or a later line.
+
+Now improve get_type using the same search pattern from preprocess_gui_lines  and just return the text, stripped, before ( or {.

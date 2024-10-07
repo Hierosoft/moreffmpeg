@@ -54,11 +54,63 @@ class GMICHelp:
     def __init__(self):
         self.commands = OrderedDict()
 
+    def preprocess_gui_lines(self, commands_txt):
+        """Preprocess the commands_txt to extract and merge #@gui lines."""
+        gui_lines = []
+        current_line = ""
+        collecting = False
+
+        inside_quotes = False
+        start_char = None
+        end_char = None
+
+        for line in commands_txt.splitlines():
+            line = line.strip()
+
+            if not line.startswith("#@gui "):
+                continue  # Only process lines starting with '#@gui '
+
+            # Extract the value after the equals sign, and determine if we should start collecting
+            if not collecting:
+                # Extract the value after the equals sign
+                if '=' in line:
+                    value = line.split('=', 1)[1].strip()
+
+                    # Use regex to check for the start of a multiline construct
+                    if re.search(r'(\(|\{)', value):
+                        start_char = re.search(r'(\(|\{)', value).group(1)
+                        end_char = {'(': ')', '{': '}'}[start_char]
+                        collecting = True  # Start collecting lines
+                    current_line = line  # Start accumulating the line
+                else:
+                    current_line = line  # Regular line without collecting
+            else:
+                current_line += line  # Append this line to the current entry
+
+            # Track quoted status while iterating through the characters
+            inside_quotes = self.track_quoted_status(current_line, inside_quotes)
+
+            # If we're collecting and find the closing character, stop collecting
+            if collecting and end_char in current_line and not inside_quotes:
+                collecting = False
+                gui_lines.append(current_line)  # Add the complete entry to gui_lines
+                current_line = ""  # Reset for the next line
+
+        return gui_lines
+
+    def track_quoted_status(self, line, inside_quotes):
+        """Track whether we are inside quotes based on encountering quotes in the line."""
+        in_quotes = inside_quotes
+        for char in line:
+            if char == '"':
+                in_quotes = not in_quotes
+        return in_quotes
+
     def load_commands_txt(self, commands_txt):
         command = None
 
         # Split the input by newlines
-        for line in commands_txt.splitlines():
+        for line in self.preprocess_gui_lines():
             line = line.strip()
             if "@gui" not in line:
                 continue
@@ -98,15 +150,17 @@ class GMICHelp:
                     command.options[option.key] = option
 
     def get_type(self, option_def):
-        if "text(" in option_def:
-            return "text"
-        elif "float(" in option_def:
-            return "float"
-        elif "int(" in option_def:
-            return "int"
-        elif "choice(" in option_def:
-            return "choice"
-        return "unknown"
+        """Extract the type name from the option definition using regex.
+
+	Return:
+	    str: Return the part before the first parenthesis or curly
+	        brace, stripped of spaces
+	"""
+        # Use regex to find either '(' or '{' to split the string:
+        match = re.split(r'(\(|\{)', option_def.strip(), 1)
+        if match:
+            return match[0].strip()
+        return None
 
     def extract_float_values(self, option_def):
         values = option_def[option_def.index('(')+1:option_def.index(')')].split(',')
