@@ -79,7 +79,8 @@ you keep formatting your output instead of giving me markdown. Try restructured 
 
 Go back to markdown, but put all commands in a row in a code block
 
-
+rename the upscale_diffusion_dvd_16_9_to_720p function to main with no args, and move all argparse processing to main, so the __main__ case is only sys.exit(main()). Move width_scale=178, height_scale=150,
+                                       smoothness=0, anisotropy=0.4, sharpness=21 to a dictionary called gmic_plugin_options.
 
 
 
