@@ -147,6 +147,8 @@ class GMICHelp:
                         option.value_max = values[2]
                     elif option.type_name == "choice":
                         option.choices, option.value_default = self.extract_choices(option_def)
+		    else:
+			option.value =
                     command.options[option.key] = option
 
     def get_type(self, option_def):
@@ -162,16 +164,27 @@ class GMICHelp:
             return match[0].strip()
         return None
 
+    def extract_raw_args_str(self, option_def):
+        """Extract the raw arguments string, handling both () and {}."""
+        # Use regex to capture values inside the first set of parentheses or curly braces
+        match = re.search(r'\(([^)]*)\)|\{([^}]*)\}', option_def)
+        if match:
+            # Extract the matched group (either parentheses or curly braces)
+            return match.group(1) if match.group(1) else match.group(2)
+        return None
+
+    def extract_raw_args(self, option_def):
+        values = self.extract_raw_args_str(options_def).split(',')
+        return values
+
     def extract_float_values(self, option_def):
-        values = option_def[option_def.index('(')+1:option_def.index(')')].split(',')
-        return [float(val) for val in values]
+        return [float(val) for val in self.extract_raw_args(option_def)]
 
     def extract_int_values(self, option_def):
-        values = option_def[option_def.index('(')+1:option_def.index(')')].split(',')
-        return [int(val) for val in values]
+        return [int(val) for val in self.extract_raw_args(option_def)]
 
     def extract_choices(self, option_def):
-        parts = option_def[option_def.index('(')+1:option_def.index(')')].split(',')
+        parts = self.extract_raw_args(options_def)
         default_index = int(parts[0])
         choices = [choice.strip().strip('"') for choice in parts[1:]]
         return choices, default_index
@@ -187,7 +200,6 @@ def get_gmic_commands_txt():
     # Get the last modified file
     latest_file = max(gmic_files, key=os.path.getmtime)
     return latest_file
-
 
 
 def main():

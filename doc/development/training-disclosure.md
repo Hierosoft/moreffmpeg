@@ -137,3 +137,26 @@ Instead of processing for line in commands_txt.splitlines(), directly, iterate a
 To ensure start entry lines are not confused with {  or ( continuations, make a collecting boolean and use that to supercede start entry parsing. If not collecting, check for the start_chart, but instead of looking to see if "(" in line or "{" in line, do it more reliably. Set value = line.split("=", 1)[1]. Use regex to split value further, ending on either "(" or "{" and everything after that is processed in the way I've described to find the closing on that line or a later line.
 
 Now improve get_type using the same search pattern from preprocess_gui_lines  and just return the text, stripped, before ( or {.
+
+
+Combine the arg extract functions this way: ```    def extract_raw_args_str(self, option_def):
+        values = option_def[option_def.index('(')+1:option_def.index(')')].split(',')
+        return values
+
+    def extract_raw_args(self, option_def):
+        values = self.extract_raw_args_str(options_def).split(',')
+        return values
+
+    def extract_float_values(self, option_def):
+        return [float(val) for val in self.extract_raw_args(option_def)]
+
+    def extract_int_values(self, option_def):
+        return [int(val) for val in self.extract_raw_args(option_def)]
+
+    def extract_choices(self, option_def):
+        parts = self.extract_raw_args(options_def)
+        default_index = int(parts[0])
+        choices = [choice.strip().strip('"') for choice in parts[1:]]
+        return choices, default_index``` but improve the extract_raw_args_str function by allowing ( or { like the other regex code we used.
+
+
