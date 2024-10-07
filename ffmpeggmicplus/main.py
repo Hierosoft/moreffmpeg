@@ -246,11 +246,16 @@ def main():
     args = parser.parse_args()
 
     # Update gmic_plugin_options dictionary with command-line arguments
-    gmic_plugin_options['width_scale'] = args.width_scale
-    gmic_plugin_options['height_scale'] = args.height_scale
-    gmic_plugin_options['smoothness'] = args.smoothness
-    gmic_plugin_options['anisotropy'] = args.anisotropy
-    gmic_plugin_options['sharpness'] = args.sharpness
+    if args.width_scale:
+	gmic_plugin_options['width_scale'] = args.width_scale
+    if args.height_scale:
+	gmic_plugin_options['height_scale'] = args.height_scale
+    if args.smoothness:
+	gmic_plugin_options['smoothness'] = args.smoothness
+    if args.anisotropy:
+	gmic_plugin_options['anisotropy'] = args.anisotropy
+    if args.sharpness:
+	gmic_plugin_options['sharpness'] = args.sharpness
 
     # ffmpeg process to get frames
     input_file = args.input_file
