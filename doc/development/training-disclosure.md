@@ -82,6 +82,25 @@ Go back to markdown, but put all commands in a row in a code block
 rename the upscale_diffusion_dvd_16_9_to_720p function to main with no args, and move all argparse processing to main, so the __main__ case is only sys.exit(main()). Move width_scale=178, height_scale=150,
                                        smoothness=0, anisotropy=0.4, sharpness=21 to a dictionary called gmic_plugin_options.
 
+At the beginning of main, call a get_gmic_commands_txt function that will list all .gmic files in ~/.config/gmic, and return the last modified one. If there are no results, return None. In main, set commands_txt to the value. If the file doesn't exist, show "Warning: Install the gmic package for your distro (or compile & install gmic) then run it at least once to download and generate a gmic commands file such as ~/.config/gmic/update292.gmic." and set commands_txt to a DEFAULT_COMMANDS_TXT global which should be """#@gui Upscale [Diffusion]:fx_upscale_smart,fx_upscale_smart_preview(0)
+#@gui :Width=text("200%")
+#@gui :Height=text("200%")
+#@gui :Smoothness=float(2,0,20)
+#@gui :Anisotropy=float(0.4,0,1)
+#@gui :Sharpness=float(50,0,100)
+#@gui :_=separator()
+#@gui :_=note("<small>Author: <i><a href="http://bit.ly/2CmhX65">David Tschumperl&#233;</a></i>.&#160;&#160;&#160;&#160;&#160;&#160;Latest Update: <i>2010/29/12</i>.</small>")
+""".
 
+Write a GMICHelp class with a load_commands_txt function. At the beginning of main, set help = GMICHelp(), then call help.load_commands_txt(commands_txt). The method should set a local variable command = None, self.commands = OrderedDict() if self.commands is None, then split the input by newlines, then for each line, see if the line contains "@gui", otherwise continue (short circuit loop). Get all text after that as gui_txt and strip it. If gui_txt does not start with ":", collect the command like self.commands[command.key] if command is not None and set command as a new CommandInfo instance, setting the attributes as follows: assume gui_txt is formatted like "Upscale [Diffusion] : fx_upscale_smart, fx_upscale_smart_preview(0)" in this case, split(":", 1) to only split into 2 parts, and set name to the part before ":" (stripped) then split the second part (after ":") by comma, then set name to the first element (stripped), and the rest of the list can do in a functions attribute. else create option = OptionInfo(), and set its name, type_name (and value_default, value_min, value_max in that order if typeName is neither "text" nor "_bool" nor "separator" nor "note" nor choice), assuming the format of the line can be any of: #@gui : Width = text("200%")
+Height = text("200%")
+Smoothness = float(2,0,20)
+Anisotropy = float(0.4,0,1)
+Sharpness = float(50,0,100) url = link("https://thispersondoesnotexist.com/") Update Portrait = button()
+sep = separator() choice(2,"Dots","Wireframe","Flat","Flat-Shaded","Gouraud","Phong")
+note = note("<small>Author: <i>David Tschumperlé</i>.      Latest Update: <i>2010/29/12</i>.</small>"). If the type is choice, use the first item (2 in that case) as the default_index but do not set default_value, and the rest of the comma-separated values in parenthesis should go in a list called choices and the quotes should be stripped. Also set option.key to name.lower(). Write the OptionInfo class with those attributes, and add this to an ordered dict in the current command: command.options using option.key as the key. if type is float, cast each value in the parenthesis to float, or if int, cast each to int.
+
+
+In the case of  if not gui_txt.startswith(":"):, the options should not be touched. Instead of options_list = options_txt.split(","), set functions_list = options_txt.split(",") then set key=functions_list[0] and set command.functions = functions_list
 
 

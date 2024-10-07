@@ -68,6 +68,8 @@ the following optional parameters:
 Contributions are welcome! Feel free to open issues or submit pull
 requests for improvements or new features.
 
+See also [doc/development/index.md](doc/development/index.md)
+
 ## License
 
 See [license.txt](license.txt)
