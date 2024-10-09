@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ffmpeg-gmic-plus',
+    name='moreffmpeg',
     version='0.1.0',
-    description="Use G'MIC plugins with ffmpeg (finally!) thanks to the wonderful ffmpeg-python and gmic for Python. A useful high-level feature ensures correct integer size after float scaling.",
+    description="Use G'MIC plugins with ffmpeg (finally!) using the wonderful ffmpeg-python and gmic for Python.",
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='Your Name',
     author_email='7557867+poikilos@users.noreply.github.com',
-    url='https://github.com/Hierosoft/ffmpeg-gmic-plus',
+    url='https://github.com/Hierosoft/moreffmpeg',
     packages=find_packages(),
     install_requires=[
         'ffmpeg-python',
@@ -27,7 +27,7 @@ setup(
     python_requires='>=3.6',
     entry_points = {
         'console_scripts': [
-            'ffmpeg-gmic = ffmpeggmicplus.main:main',
+            'moreffmpeg = moreffmpeg.main:main',
         ],
     },
 )

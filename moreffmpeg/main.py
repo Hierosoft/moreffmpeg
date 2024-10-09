@@ -13,6 +13,20 @@ from datetime import datetime
 
 gmic_help = None
 
+gmic_file_git = "~/.config/moreffmpeg/gmic_stdlib.gmic"
+
+gmic_file_msg = (
+    "Install the gmic package for your distro"
+    " (or compile & install gmic) then run it at least once"
+    " to automatically download or generate a gmic commands file"
+    " such as ~/.config/gmic/update292.gmic"
+    " or if you are using the git version, you may use"
+    " the following if your version matches:\n"
+    "     mkdir -p %s && wget -O %s"
+    " https://github.com/GreycLab/gmic/raw/refs/heads/master/src/gmic_stdlib.gmic"
+    % (os.path.dirname(gmic_file_git), gmic_file_git)
+)
+
 DEFAULT_COMMANDS_TXT = """#@gui Upscale [Diffusion]:fx_upscale_smart,fx_upscale_smart_preview(0)
 #@gui :Width=text("200%")
 #@gui :Height=text("200%")
@@ -25,8 +39,8 @@ DEFAULT_COMMANDS_TXT = """#@gui Upscale [Diffusion]:fx_upscale_smart,fx_upscale_
 
 # Default G'MIC plugin options
 gmic_plugin_options = {
-    'width_scale': 178,
-    'height_scale': 150,
+    'width': 178,
+    'height': 150,
     'smoothness': 0,
     'anisotropy': 0.4,
     'sharpness': 21,
@@ -147,17 +161,17 @@ class GMICHelp:
                         option.value_max = values[2]
                     elif option.type_name == "choice":
                         option.choices, option.value_default = self.extract_choices(option_def)
-		    else:
-			option.value =
+            else:
+            option.value =
                     command.options[option.key] = option
 
     def get_type(self, option_def):
         """Extract the type name from the option definition using regex.
 
-	Return:
-	    str: Return the part before the first parenthesis or curly
-	        brace, stripped of spaces
-	"""
+    Return:
+        str: Return the part before the first parenthesis or curly
+            brace, stripped of spaces
+    """
         # Use regex to find either '(' or '{' to split the string:
         match = re.split(r'(\(|\{)', option_def.strip(), 1)
         if match:
@@ -195,6 +209,9 @@ def get_gmic_commands_txt():
     gmic_files = glob.glob(os.path.join(gmic_dir, "*.gmic"))
 
     if not gmic_files:
+        try_file = os.path.expanduser(gmic_file_git)
+        if os.path.isfile(try_file):
+            return try_file
         return None
 
     # Get the last modified file
@@ -208,11 +225,11 @@ def main():
     commands_txt = get_gmic_commands_txt()
 
     if commands_txt is None or not os.path.exists(commands_txt):
-        print("Warning: Install the gmic package for your distro (or compile & install gmic) then run it at least once to download and generate a gmic commands file such as ~/.config/gmic/update292.gmic.")
+        print("Warning: %s" % gmic_file_msg)
         commands_txt = DEFAULT_COMMANDS_TXT
     else:
-	gmic_help = GMICHelp()
-	gmic_help.load_commands_txt(commands_txt)
+    gmic_help = GMICHelp()
+    gmic_help.load_commands_txt(commands_txt)
 
     # Continue with the rest of your FFmpeg addon logic here...
     print("Using commands file:", commands_txt)
@@ -223,12 +240,12 @@ def main():
     parser.add_argument("-i", help="Input video file")
     parser.add_argument("-o", help="Output video file")
     parser.add_argument(
-        "--width_scale", type=int, default=gmic_plugin_options['width_scale'],
-        help="Percentage to upscale width, such as 720*1.78=1282, cropped to 1280 (default: %s)" % gmic_plugin_options['width_scale']
+        "--width", type=int, default=gmic_plugin_options['width'],
+        help="Percentage to upscale width, such as 720*1.78=1282, cropped to 1280 (default: %s)" % gmic_plugin_options['width']
     )
     parser.add_argument(
-        "--height_scale", type=int, default=gmic_plugin_options['height_scale'],
-        help="Percentage to upscale height, such as 150 for 480*1.5=720 (default: %s)" % gmic_plugin_options['height_scale']
+        "--height", type=int, default=gmic_plugin_options['height'],
+        help="Percentage to upscale height, such as 150 for 480*1.5=720 (default: %s)" % gmic_plugin_options['height']
     )
     parser.add_argument(
         "--smoothness", type=int, default=gmic_plugin_options['smoothness'],
@@ -246,16 +263,16 @@ def main():
     args = parser.parse_args()
 
     # Update gmic_plugin_options dictionary with command-line arguments
-    if args.width_scale:
-	gmic_plugin_options['width_scale'] = args.width_scale
-    if args.height_scale:
-	gmic_plugin_options['height_scale'] = args.height_scale
+    if args.width:
+        gmic_plugin_options['width'] = args.width
+    if args.height:
+        gmic_plugin_options['height'] = args.height
     if args.smoothness:
-	gmic_plugin_options['smoothness'] = args.smoothness
+        gmic_plugin_options['smoothness'] = args.smoothness
     if args.anisotropy:
-	gmic_plugin_options['anisotropy'] = args.anisotropy
+        gmic_plugin_options['anisotropy'] = args.anisotropy
     if args.sharpness:
-	gmic_plugin_options['sharpness'] = args.sharpness
+        gmic_plugin_options['sharpness'] = args.sharpness
 
     # ffmpeg process to get frames
     input_file = args.input_file
@@ -290,7 +307,7 @@ def main():
 
         # G'MIC processing with the updated plugin options
         gmic_command = "fx_upscale_smart %d,%d,%d,%0.2f,%d" % (
-            gmic_plugin_options['width_scale'], gmic_plugin_options['height_scale'],
+            gmic_plugin_options['width'], gmic_plugin_options['height'],
             gmic_plugin_options['smoothness'], gmic_plugin_options['anisotropy'],
             gmic_plugin_options['sharpness']
         )
