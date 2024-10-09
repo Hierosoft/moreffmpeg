@@ -1,10 +1,11 @@
-# ffmpeg-gmic-plus
+# moreffmpeg
 Use G\'MIC plugins with ffmpeg (finally!) thanks to the wonderful
 ffmpeg-python and gmic for Python.
 
+
 ## Overview
 
-**ffmpeg-gmic-plus** is a Python library that allows you to
+**moreffmpeg** is a Python library that allows you to
 utilize G\'MIC plugins with FFmpeg in a straightforward and efficient
 manner. It leverages ffmpeg-python and gmic
 to perform high-quality image and video processing, specifically
@@ -14,6 +15,7 @@ This project provides a convenient way to upscale videos to a 720p
 resolution while maintaining the correct aspect ratio, ensuring the
 final output meets your requirements.
 
+
 ## Features
 
 - Utilize G\'MIC\'s diffusion upscale directly within FFmpeg.
@@ -22,10 +24,11 @@ final output meets your requirements.
 - Adjustable parameters for upscaling, including width scale, height
   scale, smoothness, anisotropy, and sharpness.
 
+
 ## Installation
 ```bash
-git clone https://github.com/Hierosoft/ffmpeg-gmic-plus.git
-cd ffmpeg-gmic-plus
+git clone https://github.com/Hierosoft/moreffmpeg.git
+cd moreffmpeg
 sudo apt install python3-venv
 python3 -m venv .venv
 source .venv/bin/activate  # For Linux and macOS
@@ -39,13 +42,13 @@ pip install -r requirements.txt
 To upscale a video, run the following command:
 
 ```bash
-python upscale_diffusion_dvd_16_9_to_720p.py <input_file> <output_file>
+scripts/moreffmpeg <input_file> <output_file>
 ```
 
 ### Example
 
 ```bash
-python upscale_diffusion_dvd_16_9_to_720p.py input_video.mp4 output_video.mp4
+scripts/moreffmpeg input_video.mp4 output_video.mp4
 ```
 
 This command will read [input_video.mp4]{.title-ref}, apply the G\'MIC
