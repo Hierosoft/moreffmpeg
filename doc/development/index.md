@@ -1,4 +1,4 @@
-# ffmpeg-gmic-plus Development
+# moreffmpeg Development
 
 ## gmic commands
 The only exhaustive list of commands I could find is in [gmic/src/gmic_stdlib.gmic](https://raw.githubusercontent.com/GreycLab/gmic/refs/heads/master/src/gmic_stdlib.gmic).
@@ -18,14 +18,14 @@ fx_upscale_smart :
 ```
 (The GIMP plugin is defined in a SCM file in <https://github.com/GreycLab/gmic/tree/master/src>)
 
-Example `ffmpeg` commands that could be improved with `ffmpeg-gmic`:
+Example `ffmpeg` commands that could be improved with `moreffmpeg`:
 ```
 ffmpeg -threads 0 -analyzeduration 150M -probesize 150M -i input.vob -map 0:v -preset veryslow -vf crop=720:464:0:4,scale=1024:-2:flags=print_info+lanczos+accurate_rnd+full_chroma_int:param0=5,unsharp=7:7:1.0:7:7:0.0,vaguedenoiser=method=1:threshold=4 -profile:v high -level:v 4.0 -vcodec libx264 -crf 22 -tune film -allow_skip_frames 1 -g 120 -bf 0 -pix_fmt yuv420p -x264-params look_ahead_depth=60 -map 0:a:0 -acodec copy output.mkv
 ffmpeg -threads 0 -analyzeduration 150M -probesize 150M -i input.vob -map 0:v -preset veryslow -vf crop=720:464:0:4,scale=1024:-2:flags=lanczos:param0=5,unsharp=7:7:1.0:7:7:0.0,vaguedenoiser=method=1:threshold=4 -profile:v high -level:v 4.0 -vcodec libx264 -crf 22 -tune film -allow_skip_frames 1 -g 120 -bf 0 -pix_fmt yuv420p -x264-params look_ahead_depth=60 -map 0:a:0 -acodec copy output.mkv
 ```
 
 ## Example commands
-This section provides some examples of commands that should be allowed and passed to `ffmpeg-gmic` after `-vf`.
+This section provides some examples of commands that should be allowed and passed to `moreffmpeg` after `--gmic`.
 
 Based on ffmpeg frei0r syntax `frei0r=filter_name=pixeliz0r:filter_params=0.02|0.02`
 and gmic CLI syntax `gmic vlcsnap-2024-10-07-08h23m00s709.png fx_upscale_smart 178%,150%,0,0.4,35 output output_image.png`:
